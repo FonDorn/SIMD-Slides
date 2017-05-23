@@ -1,0 +1,155 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<title>SIMD in JavaScript</title>
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css">
+
+		<!-- Style -->
+		<link rel="stylesheet" href="css/styles.css">
+
+		<!-- Theme used for syntax highlighting of code -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<!-- Slide 1 -->
+				<section>
+					<h1>SIMD in JavaScript</h1>
+					<h3 style="color: #ff2c2d;">OdessaJS 2017</h3>
+					<p><small>Mike Nedosekin</small></p>
+				</section>
+
+				<!-- Slide 2 -->
+				<section>
+					<section>
+						<h2>SISD: Single Instruction, Single Data</h2>
+						<img class="fragment fade-in visible" src="https://mdn.mozillademos.org/files/10509/SISD.png" />
+					</section>
+					<section>
+						<h2>SIMD: Single Instruction, Multiple Data</h2>
+						<img class="fragment fade-in visible" src="https://mdn.mozillademos.org/files/10507/SIMD.png" />
+					</section>
+				</section>
+
+				<!-- Slide 3 -->
+				<section>
+					<h2>Data types</h2>
+					<img class="fragment fade-in visible" src="https://mdn.mozillademos.org/files/12259/simd_register_drawio.png" />
+				</section>
+
+				<!-- Slide 4 -->
+				<section>
+					<section>
+						<h2>Arithmetic</h2>
+						<pre><code class="hljs" data-trim contenteditable>
+							var a = SIMD.Float32x4(1.0, 2.0, 3.0, 4.0);
+							var b = SIMD.Float32x4(5.0, 10.0, 15.0, 20.0);
+							var c = SIMD.Float32x4.add(a,b);
+						</code></pre>
+						<img class="fragment fade-in visible" src="img/simdArithmetic.png" />
+					</section>
+					<section>
+						<h2>Average</h2>
+						<pre><code class="hljs" data-trim contenteditable>
+function average(list) {
+  var n = list.length;
+  var sum = 0.0;
+  for (var i = 0; i < n; i++) {
+    sum += list[i];
+  }
+  return sum / n;
+}
+						</code></pre>
+						<pre><code class="hljs fragment fade-in visible" data-trim contenteditable>
+function average(list) {
+  var n = list.length;
+  var sum = SIMD.Float32x4.splat(0.0);
+  for (var i = 0; i < n; i += 4) {
+    sum = SIMD.Float32x4.add(sum, SIMD.Float32x4.load(list, i));
+  }
+  var total = SIMD.Float32x4.extractLane(sum, 0) +
+              SIMD.Float32x4.extractLane(sum, 1) +
+              SIMD.Float32x4.extractLane(sum, 2) +
+              SIMD.Float32x4.extractLane(sum, 3);
+  return total / n;
+}
+						</code></pre>
+					</section>
+					<section>
+						<h2>SIMD Average</h2>
+						<img src="img/simdAverage.png" />
+					</section>
+				</section>
+
+				<!-- Slide 5 -->
+				<section>
+					<h2>Mandelbrot Demo</h2>
+					<iframe scrolling="no"
+						src="/examples/mandelbrot/"
+						style="width:100%; height:700px">
+					</iframe>
+				</section>
+
+				<!-- Slide 6 -->
+				<section>
+					<h2>Multiple Birds Demo</h2>
+					<iframe scrolling="no"
+						src="/examples/fbird/"
+						style="width:100%; height:500px">
+					</iframe>
+				</section>
+
+				<!-- Slide 7 -->
+				<section>
+					<h2>Meshes Demo</h2>
+					<iframe scrolling="no"
+						src="https://huningxin.github.io/skinning_simd/"
+						style="width:100%; height:700px">
+					</iframe>
+				</section>
+
+				<!-- Slide 8 -->
+				<section>
+					<h2>Dancers Demo</h2>
+					<iframe scrolling="no"
+						src="/examples/dancer/"
+						style="width:100%; height:500px">
+					</iframe>
+				</section>
+
+			</div>
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+			// More info about config & dependencies:
+			// - https://github.com/hakimel/reveal.js#configuration
+			// - https://github.com/hakimel/reveal.js#dependencies
+			Reveal.initialize({
+				dependencies: [
+					{ src: 'plugin/markdown/marked.js' },
+					{ src: 'plugin/markdown/markdown.js' },
+					{ src: 'plugin/notes/notes.js', async: true },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
+				]
+			});
+		</script>
+	</body>
+</html>
